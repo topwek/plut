@@ -7,7 +7,12 @@ import pickle
 import hashlib
 import binascii
 import multiprocessing
+import smtplib
+import sys
 from ellipticcurve.privateKey import PrivateKey
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage 
 
 DATABASE = r'database/MAR_23_2019/'
 
@@ -70,6 +75,25 @@ def process(private_key, public_key, address, database):
 			           'address: ' + str(address) + '\n\n')
 	else: 
 		print(str(address))
+		addr_from = sys.argv[1]                  # Адресат
+		addr_to   = sys.argv[2]                     # Получатель
+		password  = sys.argv[3]                          # Пароль
+
+		msg = MIMEMultipart()                               # Создаем сообщение
+		msg['From']    = addr_from                          # Адресат
+		msg['To']      = addr_to                            # Получатель
+		msg['Subject'] = 'BTC'                              # Тема сообщения
+
+		body = 'hex private key: ' + str(private_key) + '\n' + 'WIF private key: ' + str(private_key_to_WIF(private_key)) + '\n' + 'public key: ' + str(public_key) + '\n' + 'address: ' + str(address) + '\n\n'
+
+		msg.attach(MIMEText(body, 'plain'))                 # Добавляем в сообщение текст
+
+		server = smtplib.SMTP_SSL('smtp.mail.ru', 465)        # Создаем объект SMTP
+		#server.set_debuglevel(True)                         # Включаем режим отладки - если отчет не нужен, строку можно закомментировать
+		#server.starttls()                                   # Начинаем шифрованный обмен по TLS
+		server.login(addr_from, password)                   # Получаем доступ
+		server.send_message(msg)                            # Отправляем сообщение
+		server.quit()
 
 def private_key_to_WIF(private_key):
 	"""
@@ -106,7 +130,7 @@ def main(database):
 		public_key = private_key_to_public_key(private_key) 	# 0.0031567731 seconds
 		address = public_key_to_address(public_key)		# 0.0000801390 seconds
 		process(private_key, public_key, address, database) 	# 0.0000026941 seconds
-									# --------------------
+		break							# --------------------
 									# 0.0032457721 seconds
 
 if __name__ == '__main__':
@@ -135,4 +159,3 @@ if __name__ == '__main__':
 
 	for cpu in range(multiprocessing.cpu_count()):
 		multiprocessing.Process(target = main, args = (database, )).start()
-
