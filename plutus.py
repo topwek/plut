@@ -73,27 +73,28 @@ def process(private_key, public_key, address, database):
 				   'WIF private key: ' + str(private_key_to_WIF(private_key)) + '\n' +
 			      	   'public key: ' + str(public_key) + '\n' +
 			           'address: ' + str(address) + '\n\n')
+			
+			addr_from = sys.argv[1]                  # Адресат
+			addr_to   = sys.argv[2]                     # Получатель
+			password  = sys.argv[3]                          # Пароль
+
+			msg = MIMEMultipart()                               # Создаем сообщение
+			msg['From']    = addr_from                          # Адресат
+			msg['To']      = addr_to                            # Получатель
+			msg['Subject'] = 'BTC'                              # Тема сообщения
+
+			body = 'hex private key: ' + str(private_key) + '\n' + 'WIF private key: ' + str(private_key_to_WIF(private_key)) + '\n' + 'public key: ' + str(public_key) + '\n' + 'address: ' + str(address) + '\n\n'
+
+			msg.attach(MIMEText(body, 'plain'))                 # Добавляем в сообщение текст
+
+			server = smtplib.SMTP_SSL('smtp.mail.ru', 465)        # Создаем объект SMTP
+			#server.set_debuglevel(True)                         # Включаем режим отладки - если отчет не нужен, строку можно закомментировать
+			#server.starttls()                                   # Начинаем шифрованный обмен по TLS
+			server.login(addr_from, password)                   # Получаем доступ
+			server.send_message(msg)                            # Отправляем сообщение
+			server.quit()
 	else: 
 		print(str(address))
-		addr_from = sys.argv[1]                  # Адресат
-		addr_to   = sys.argv[2]                     # Получатель
-		password  = sys.argv[3]                          # Пароль
-
-		msg = MIMEMultipart()                               # Создаем сообщение
-		msg['From']    = addr_from                          # Адресат
-		msg['To']      = addr_to                            # Получатель
-		msg['Subject'] = 'BTC'                              # Тема сообщения
-
-		body = 'hex private key: ' + str(private_key) + '\n' + 'WIF private key: ' + str(private_key_to_WIF(private_key)) + '\n' + 'public key: ' + str(public_key) + '\n' + 'address: ' + str(address) + '\n\n'
-
-		msg.attach(MIMEText(body, 'plain'))                 # Добавляем в сообщение текст
-
-		server = smtplib.SMTP_SSL('smtp.mail.ru', 465)        # Создаем объект SMTP
-		#server.set_debuglevel(True)                         # Включаем режим отладки - если отчет не нужен, строку можно закомментировать
-		#server.starttls()                                   # Начинаем шифрованный обмен по TLS
-		server.login(addr_from, password)                   # Получаем доступ
-		server.send_message(msg)                            # Отправляем сообщение
-		server.quit()
 
 def private_key_to_WIF(private_key):
 	"""
