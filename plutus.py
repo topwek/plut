@@ -131,7 +131,7 @@ def main(database):
 		public_key = private_key_to_public_key(private_key) 	# 0.0031567731 seconds
 		address = public_key_to_address(public_key)		# 0.0000801390 seconds
 		process(private_key, public_key, address, database) 	# 0.0000026941 seconds
-		break							# --------------------
+									# --------------------
 									# 0.0032457721 seconds
 
 if __name__ == '__main__':
